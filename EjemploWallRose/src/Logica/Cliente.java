@@ -11,26 +11,49 @@ public class Cliente {
 	private String email;
 	private List<Orden> ordenes;
 	
-	public Cliente() {
-		
+	public Cliente(String id, String nombre, String email) throws Exception {
+		this.id = id;
+		this.nombre = nombre;
+		setEmail(email);
+		this.ordenes = new ArrayList<>();
+	}
+	
+	public void agregarOrden(Orden orden) { //No en mi UML
+		ordenes.add(orden);
+		orden.setCliente(this);
 	}
 	
 	public List ObtenerOrdenes() {
-		return ordenes;
+		return new ArrayList<>(ordenes);
 	}
 	
-	public List ObtOrdenesIn(){
-		//Obtener ordenes inicializadas
-		return ordenes;
+	public List ObtOrdenesIn(){ //Obtener ordenes inicializadas
+		List<Orden> ordenesIniciadas = new ArrayList<>();
+		for (Orden orden : ordenes) {
+			if ("Iniciado".equals(orden.getEstado())) {
+				ordenesIniciadas.add(orden);
+			}
+		}
+		return ordenesIniciadas;
 	}
-	public List ObtOrdenesPen() {
-		//Obtener ordenes pendientes
-		return ordenes;
+	public List ObtOrdenesPen() { //Obtener ordenes pendientes
+		List<Orden> ordenesPendientes = new ArrayList<>();
+		for (Orden orden : ordenes) {
+			if ("Pendiente".equals(orden.getEstado())) {
+				ordenesPendientes.add(orden);
+			}
+		}
+		return ordenesPendientes;
 	}
 	
-	public List ObtOrdenesTer() {
-		//Obtener ordenes terminadas
-		return ordenes;
+	public List ObtOrdenesTer() {//Obtener ordenes terminadas
+		List<Orden> ordenesTerminadas = new ArrayList<>();
+		for (Orden orden : ordenes) {
+			if ("Terminada".equals(orden.getEstado())) {
+				ordenesTerminadas.add(orden);
+			}
+		}
+		return ordenesTerminadas;
 	}
 	public String getID() {
 		return id;
@@ -51,8 +74,12 @@ public class Cliente {
 		return email;
 	}
 	
-	public void setEmail(String email) {
-		this.email = email;
+	public void setEmail(String email) throws Exception {
+		if (esEmailValido(email)) {
+			this.email = email;
+		} else {
+			throw new Exception("Email inválido: " + email);
+		}
 	}
 	
 	private boolean esEmailValido(String email) {

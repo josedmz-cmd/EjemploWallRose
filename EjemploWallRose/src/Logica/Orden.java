@@ -24,15 +24,19 @@ public class Orden {
 	}
 	
 	public double calcularMonto() { //No en mi UML
-		
+		double total = 0;
+		for (Linea linea : Lineas) {
+			total += linea.CalcularPrecio();
+		}
+		return total;
 	}
 	
 	public double calcularMontoImpuesto() { //No en mi UML
-		
+		return calcularMonto() * impuesto;
 	}
 	
 	public double obtMontoTotal() {
-		
+		return calcularMonto() + calcularMontoImpuesto();
 	}
 	
 	public List obtLineas() {
@@ -40,19 +44,49 @@ public class Orden {
 	}
 	
 	public void actualizar(int numero) {
-		
+		this.numero = numero;
 	}
 	
 	public void agregarLinea(int codigoPro, int cantidad) {
-		
+		//Probablemente se use en controladora
+	}
+	
+	public void agregarLinea(Producto producto, double cantidad) {
+		if (producto.getExistencias() >= cantidad) {
+			Linea linea = new Linea(producto, cantidad);
+			Lineas.add(linea);
+			producto.setExistencias(producto.getExistencias() - cantidad);
+		} else {
+			System.out.println("No hay suficientes existencias del producto: " + producto.getNombre());
+		}
 	}
 	
 	public void actualizarLinea(int numeroLinea, int codigoPro, int cantidad) {
-		
+		//Probablemente se use en controladora
+	}
+	
+	public void actualizarLinea(int posicion, Producto producto, double cantidad) {
+		if (posicion >= 0 && posicion < Lineas.size()) {
+			Linea lineaActual = Lineas.get(posicion);
+			Producto productoAnterior = lineaActual.getProducto();
+			productoAnterior.setExistencias(productoAnterior.getExistencias() + lineaActual.getCantidad());
+			if (producto.getExistencias() >= cantidad) {
+				Linea nuevaLinea = new Linea(producto, cantidad);
+				Lineas.set(posicion, nuevaLinea);
+				producto.setExistencias(producto.getExistencias() - cantidad);
+			} else {
+				System.out.println("No hay suficientes existencias del nuevo producto");
+			}
+		}
 	}
 	
 	public void borrarLinea(int numeroLinea) {
-		
+		if (numeroLinea >= 0 && numeroLinea < Lineas.size()) {
+			Linea lineaEliminar = Lineas.get(numeroLinea);
+			Producto producto = lineaEliminar.getProducto();
+			producto.setExistencias(producto.getExistencias() + lineaEliminar.getCantidad());
+			Lineas.remove(numeroLinea);
+		}
 	}
 	//Aquí empiezan los que no estaban en mi UML
 
@@ -74,5 +108,9 @@ public class Orden {
 	
 	public Cliente getCliente() {
 		return cliente;
+	}
+	
+	public void setCliente(Cliente cliente) {
+		this.cliente = cliente;
 	}
 }
