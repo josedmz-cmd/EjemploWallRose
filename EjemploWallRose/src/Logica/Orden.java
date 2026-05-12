@@ -101,7 +101,11 @@ public class Orden {
 	public int getNumero() {
 		return numero;
 	}
-
+	
+	public int getCodigo() {
+		return codigo;
+	}
+	
 	public LocalDateTime getFechaCreacion() {
 		return fechaCreacion;
 	}

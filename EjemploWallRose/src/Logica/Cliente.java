@@ -23,6 +23,10 @@ public class Cliente {
 		orden.setCliente(this);
 	}
 	
+	public void borrarOrden(Orden orden) { //No en mi UML
+		ordenes.remove(orden);
+	}
+	
 	public List ObtenerOrdenes() {
 		return new ArrayList<>(ordenes);
 	}
