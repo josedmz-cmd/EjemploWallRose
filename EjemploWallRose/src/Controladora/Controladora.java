@@ -61,7 +61,7 @@ public class Controladora {
 		productos.put(producto.getCodigo(), producto);
 	}
 	
-	public List ObtenerClientes() { //ObtenerClientes() List<Cliente>
+	public List ObtenerClientes() { 
 		return new ArrayList<>(clientes.values());
 	}
 	
@@ -69,38 +69,34 @@ public class Controladora {
 		return clientes.get(id);
 	}
 	
-	public List ObtenerListaOrdenesClientes() { //ObtenerListaOrdenesClientes() : List<Orden>
+	public List ObtenerListaOrdenesClientes() { //Originalmente no en mi UML
 		List<Orden> todasOrdenes = new ArrayList<>();
 		for (Cliente cliente : clientes.values()) {
 			todasOrdenes.addAll(cliente.ObtenerOrdenes());
 		}
 		return todasOrdenes;
-		//Originalmente no en mi UML
 	}
 	
-	public List obtenerListadoOrdenesIniciadasCliente() { //obtenerListadoOrdenesIniciadasCliente() : List<Orden>
+	public List obtenerListadoOrdenesIniciadasCliente() { //Originalmente no en mi UML
 		List<Orden> ordenesIniciadas = new ArrayList<>();
 		for (Cliente cliente : clientes.values()) {
 			ordenesIniciadas.addAll(cliente.ObtOrdenesIn());
 		}
 		return ordenesIniciadas;
-		//Originalmente no en mi UML
 	}
-	public List obtenerListadoOrdenesPendientesCliente() { //obtenerListadoOrdenesPendientesCliente() : List<Orden>
+	public List obtenerListadoOrdenesPendientesCliente() { //Originalmente no en mi UML
 		List<Orden> ordenesPendientes = new ArrayList<>();
 		for (Cliente cliente : clientes.values()) {
 			ordenesPendientes.addAll(cliente.ObtOrdenesPen());
 		}
 		return ordenesPendientes;
-	//Originalmente no en mi UML
 }
-	public List obtenerListadoOrdenesTerminadasCliente() { //obtenerListadoOrdenesTerminadasCliente() : List<Orden>
+	public List obtenerListadoOrdenesTerminadasCliente() { //Originalmente no en mi UML
 		List<Orden> ordenesTerminadas = new ArrayList<>();
 		for (Cliente cliente : clientes.values()) {
 			ordenesTerminadas.addAll(cliente.ObtOrdenesTer());
 		}
 		return ordenesTerminadas;
-	//Originalmente no en mi UML
 }
 
 	public void BorrarCliente(String id) throws Exception {
@@ -134,13 +130,12 @@ public class Controladora {
 		return ordenes.get(numeroOrden);
 	}
 	
-	public List obtenerLineasOrden(int numeroOrden) { //obtenerLineasOrden() : List<Linea>
+	public List obtenerLineasOrden(int numeroOrden) { //Originalmente no en mi UML
 		Orden orden = ordenes.get(numeroOrden);
 		if (orden != null) {
 			return orden.obtLineas();
 		}
 		return new ArrayList<>();
-		//Originalmente no en mi UML
 	}
 	
 	public void establecerOrdenPendiente(int numeroOrden) throws Exception { //Originalmente no en mi UML
@@ -213,7 +208,7 @@ public class Controladora {
 		}
 	}
 	
-	public List ObtenerProductos() { //ObtenerProductos : List<Producto>
+	public List ObtenerProductos() {
 		return new ArrayList<>(productos.values());
 	}
 	
