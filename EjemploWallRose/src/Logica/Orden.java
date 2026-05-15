@@ -47,10 +47,6 @@ public class Orden {
 		this.numero = numero;
 	}
 	
-	public void agregarLinea(int codigoPro, int cantidad) {
-		//Probablemente se use en controladora
-	}
-	
 	public void agregarLinea(Producto producto, double cantidad) {
 		if (producto.getExistencias() >= cantidad) {
 			Linea linea = new Linea(producto, cantidad);
@@ -59,10 +55,6 @@ public class Orden {
 		} else {
 			System.out.println("No hay suficientes existencias del producto: " + producto.getNombre());
 		}
-	}
-	
-	public void actualizarLinea(int numeroLinea, int codigoPro, int cantidad) {
-		//Probablemente se use en controladora
 	}
 	
 	public void actualizarLinea(int posicion, Producto producto, double cantidad) {
