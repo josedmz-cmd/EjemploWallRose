@@ -14,8 +14,8 @@ public class Orden {
 	private Cliente cliente;
 	private static int contadorOrdenes = 1;
 	
-	public Orden (Cliente cliente) {
-		this.codigo = contadorOrdenes++;
+	public Orden (Cliente cliente, int codigo) {
+		this.codigo = codigo;
 		this.numero = codigo;
 		this.fechaCreacion = LocalDateTime.now();
 		this.estado = "Iniciado";
@@ -108,5 +108,16 @@ public class Orden {
 	
 	public void setCliente(Cliente cliente) {
 		this.cliente = cliente;
+	}
+	
+	public int cantidadLineas() {
+		return Lineas.size();
+	}
+	
+	public Linea getLinea(int numeroLinea) {
+		if (numeroLinea >= 0 && numeroLinea < Lineas.size()) {
+	        return Lineas.get(numeroLinea);
+	    }
+	    return null;
 	}
 }

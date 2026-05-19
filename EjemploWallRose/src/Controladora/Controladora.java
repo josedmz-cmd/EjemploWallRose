@@ -5,24 +5,43 @@ import java.util.TreeMap;
 import java.util.List;
 import java.util.ArrayList;
 
+
 import Logica.Cliente;
 import Logica.Orden;
 import Logica.Producto;
+import Logica.Linea;
 
 public class Controladora {
 	private static Controladora instance = null;
 	private Map<String, Cliente> clientes;
 	private Map<Integer, Orden> ordenes;
 	private Map<Integer, Producto> productos;
-	private int consecutivoOrden;
-	private int consecutivoProducto;
+	private static int consecutivoOrden = 1;
 	
 	private Controladora() {
 		clientes = new TreeMap<>();
 		ordenes = new TreeMap<>();
 		productos = new TreeMap<>();
-		consecutivoOrden = 1;
-		consecutivoProducto = 1;
+		try {
+			this.CrearCliente("1-1111-1111", "Samantha Carter", "samantha@sg1.com");
+			this.CrearCliente("2-2222-2222", "Daniel Jackson", "daniel@sg1.com");
+			this.CrearCliente("3-3333-3333", "Jack O´Niel", "jack@sg1.com");
+			this.CrearProducto("Arroz", 20.0, "kg", 900.0);
+			this.CrearProducto("Frijoles", 10.0, "kg", 1000.0);
+			this.CrearProducto("Harina", 12.5, "kg", 1080.0);
+			this.crearOrdenVacia("1-1111-1111");
+			this.agregarLineaOrden(1, 1, 1.0);
+			this.agregarLineaOrden(1, 2, 1.0);
+			this.agregarLineaOrden(1, 3, 1.0);
+			this.crearOrdenVacia("1-1111-1111");
+			this.agregarLineaOrden(2, 1, 2.0);
+			this.agregarLineaOrden(2, 2, 2.0);
+			this.agregarLineaOrden(2, 3, 2.0);
+			this.establecerOrdenPendiente(2);
+		}
+		catch (Exception e) {
+			System.out.println(e.toString());
+		}
 	}
 	
 	public static Controladora getInstance(){ //Originalmente no en mi UML
@@ -30,6 +49,20 @@ public class Controladora {
 			instance = new Controladora();
 		}
 		return instance;
+	}
+	
+	private void verificarClienteExistente(String idCliente) throws Exception { //Originalmente no en mi UML
+		if (!clientes.containsKey(idCliente))
+			throw new Exception("Cliente no encontrado");
+	}
+	
+	private void verificarLineaOrdenExistente(int numeroOrden, int numeroLinea) throws Exception { //Originalmente no en mi UML
+		Orden orden = ordenes.get(numeroOrden);
+		if (orden == null) {
+	        throw new Exception("Orden no encontrada");
+	    }
+		if (numeroLinea < 0 || numeroLinea > orden.cantidadLineas())
+			throw new Exception("Número de línea no valido");
 	}
 	
 	public void CrearCliente(String id, String nombre, String email) throws Exception {
@@ -41,10 +74,10 @@ public class Controladora {
 		}
 	}
 	
-	public void CrearOrden(String idCliente) throws Exception {
+	public void crearOrdenVacia(String idCliente) throws Exception { //Originalmente no en mi UML
 		Cliente cliente = ObtenerCliente(idCliente);
 		if (cliente != null) {
-			Orden orden = new Orden(cliente);
+			Orden orden = new Orden(cliente, consecutivoOrden++);
 			ordenes.put(orden.getCodigo(), orden);
 			cliente.agregarOrden(orden);
 		} else {
@@ -52,54 +85,101 @@ public class Controladora {
 		}
 	}
 	
-	public void crearOrdenVacia(String idCliente) throws Exception { //Originalmente no en mi UML
-		CrearOrden(idCliente);
-	}
-	
-	public void CrearProducto(String nombre, double existencias, String unidad, double precio) {
+	public void CrearProducto(String nombre, double existencias, String unidad, double precio) throws Exception {
+		for (Producto p : productos.values()) {
+	        if (p.getNombre().equals(nombre)) {
+	            throw new Exception("Ya existe un producto con nombre: " + nombre);
+	        }
+	    }
 		Producto producto = new Producto(nombre, existencias, unidad, precio);
 		productos.put(producto.getCodigo(), producto);
 	}
 	
-	public List ObtenerClientes() { 
-		return new ArrayList<>(clientes.values());
+	public List<Cliente> ObtenerClientes() { 
+		List<Cliente> listadoClientes = new ArrayList<Cliente>();
+		for (Map.Entry<String, Cliente> e : clientes.entrySet()) {
+			listadoClientes.add(e.getValue());
+		}
+		return listadoClientes;
 	}
 	
-	public Cliente ObtenerCliente(String id) { //Originalmente no en mi UML
+	public Cliente ObtenerCliente(String id) throws Exception { //Originalmente no en mi UML
+		verificarClienteExistente(id);
 		return clientes.get(id);
 	}
 	
-	public List ObtenerListaOrdenesClientes() { //Originalmente no en mi UML
-		List<Orden> todasOrdenes = new ArrayList<>();
+	public List<Orden> ObtenerListaOrdenesCliente(String id) throws Exception { //Originalmente no en mi UML
+		verificarClienteExistente(id);
+		Cliente c = clientes.get(id);
+		List<Orden> listaOrdenes = new ArrayList<Orden>();
+		Map<Integer, Orden> ordenes = c.getOrdenes();
+		for (Orden o : ordenes.values()) {
+			listaOrdenes.add(o);
+		}
+		return listaOrdenes;
+	}
+	
+	private List<Orden> ObtenerListaOrdenesClienteEstado(String id, String estado) throws Exception { //Originalmente no en mi UML
+		verificarClienteExistente(id);
+		Cliente c = clientes.get(id);
+		List<Orden> listaOrdenes = new ArrayList<Orden>();
+		Map<Integer, Orden> ordenes = c.getOrdenes();
+		for (Orden o : ordenes.values()) {
+			if (o.getEstado().equals(estado))
+				listaOrdenes.add(o);
+		}
+		return listaOrdenes;
+	}
+	
+	public List<Orden> ObtenerListaOrdenesClientes() { //Originalmente no en mi UML
+		List<Orden> todasOrdenes = new ArrayList<Orden>();
 		for (Cliente cliente : clientes.values()) {
 			todasOrdenes.addAll(cliente.ObtenerOrdenes());
 		}
 		return todasOrdenes;
 	}
 	
-	public List obtenerListadoOrdenesIniciadasCliente() { //Originalmente no en mi UML
+	public List<Orden> obtenerListadoOrdenesIniciadasCliente() { //Originalmente no en mi UML
 		List<Orden> ordenesIniciadas = new ArrayList<>();
 		for (Cliente cliente : clientes.values()) {
 			ordenesIniciadas.addAll(cliente.ObtOrdenesIn());
 		}
 		return ordenesIniciadas;
 	}
-	public List obtenerListadoOrdenesPendientesCliente() { //Originalmente no en mi UML
+	
+	public List<Orden> ObtenerListaOrdenesClienteIniciadas(String id) throws Exception{ //Originalmente no en mi UML
+		verificarClienteExistente(id);
+		return ObtenerListaOrdenesClienteEstado(id, "Iniciado");
+	}
+	
+	public List<Orden> obtenerListadoOrdenesPendientesCliente() { //Originalmente no en mi UML
 		List<Orden> ordenesPendientes = new ArrayList<>();
 		for (Cliente cliente : clientes.values()) {
 			ordenesPendientes.addAll(cliente.ObtOrdenesPen());
 		}
 		return ordenesPendientes;
-}
-	public List obtenerListadoOrdenesTerminadasCliente() { //Originalmente no en mi UML
+	}
+	
+	public List<Orden> ObtenerListaOrdenesClientePendientes(String id) throws Exception{ //Originalmente no en mi UML
+		verificarClienteExistente(id);
+		return ObtenerListaOrdenesClienteEstado(id, "Pendiente");
+	}
+	
+	public List<Orden> obtenerListadoOrdenesTerminadasCliente() { //Originalmente no en mi UML
 		List<Orden> ordenesTerminadas = new ArrayList<>();
 		for (Cliente cliente : clientes.values()) {
 			ordenesTerminadas.addAll(cliente.ObtOrdenesTer());
 		}
 		return ordenesTerminadas;
 }
+	
+	public List<Orden> ObtenerListaOrdenesClienteTerminadas(String id) throws Exception{ //Originalmente no en mi UML
+		verificarClienteExistente(id);
+		return ObtenerListaOrdenesClienteEstado(id, "Terminada");
+	}
 
 	public void BorrarCliente(String id) throws Exception {
+		verificarClienteExistente(id);
 		Cliente cliente = clientes.remove(id);
 		if (cliente != null) {
 			// Borrar todas las órdenes del cliente
@@ -122,7 +202,7 @@ public class Controladora {
 		}
 	}
 	
-	public List ObtenerOrdenes() { //ObtenerOrdenes
+	public List<Orden> ObtenerOrdenes() { //ObtenerOrdenes
 		return new ArrayList<>(ordenes.values());
 	}
 	
@@ -130,7 +210,7 @@ public class Controladora {
 		return ordenes.get(numeroOrden);
 	}
 	
-	public List obtenerLineasOrden(int numeroOrden) { //Originalmente no en mi UML
+	public List<Linea> obtenerLineasOrden(int numeroOrden) { //Originalmente no en mi UML
 		Orden orden = ordenes.get(numeroOrden);
 		if (orden != null) {
 			return orden.obtLineas();
@@ -174,8 +254,8 @@ public class Controladora {
 	public void actualizarLineaOrden(int numeroOrden, int numeroLinea, int codigoProducto, double cantidad) throws Exception { //Originalmente no en mi UML
 		Orden orden = ordenes.get(numeroOrden);
 		Producto producto = productos.get(codigoProducto);
-		
 		if (orden != null && producto != null) {
+			verificarLineaOrdenExistente(numeroOrden, numeroLinea);
 			orden.actualizarLinea(numeroLinea, producto, cantidad);
 		} else {
 			if (orden == null) {
@@ -190,6 +270,7 @@ public class Controladora {
 	public void borrarLineaOrden(int numeroOrden, int numeroLinea) throws Exception { //Originalmente no en mi UML
 		Orden orden = ordenes.get(numeroOrden);
 		if (orden != null) {
+			verificarLineaOrdenExistente(numeroOrden, numeroLinea); 
 			orden.borrarLinea(numeroLinea);
 		} else {
 			throw new Exception("Orden no encontrada: " + numeroOrden);
@@ -208,7 +289,7 @@ public class Controladora {
 		}
 	}
 	
-	public List ObtenerProductos() {
+	public List<Producto> ObtenerProductos() {
 		return new ArrayList<>(productos.values());
 	}
 	
@@ -233,7 +314,7 @@ public class Controladora {
 	}
 	
 	public double obtenerMontoTotalPendiente() { //Originalmente no en mi UML
-		double total = 0;
+		double total = 0.0;
 		List<Orden> ordenesPendientes = obtenerListadoOrdenesPendientesCliente();
 		for (Orden orden : ordenesPendientes) {
 			total += orden.obtMontoTotal();

@@ -1,5 +1,7 @@
 package Logica;
 
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
@@ -9,40 +11,44 @@ public class Cliente {
 	private String id;
 	private String nombre;
 	private String email;
-	private List<Orden> ordenes;
+	private Map<Integer, Orden> ordenes;
 	
 	public Cliente(String id, String nombre, String email) throws Exception {
 		this.id = id;
 		this.nombre = nombre;
 		setEmail(email);
-		this.ordenes = new ArrayList<>();
+		this.ordenes = new TreeMap<>();
 	}
 	
 	public void agregarOrden(Orden orden) { //No en mi UML
-		ordenes.add(orden);
+		ordenes.put(orden.getCodigo(), orden);
 		orden.setCliente(this);
 	}
 	
 	public void borrarOrden(Orden orden) { //No en mi UML
-		ordenes.remove(orden);
+		ordenes.remove(orden.getCodigo());
 	}
 	
-	public List ObtenerOrdenes() {
-		return new ArrayList<>(ordenes);
+	public Map<Integer, Orden> getOrdenes() {
+		return ordenes;
 	}
 	
-	public List ObtOrdenesIn(){ //Obtener ordenes inicializadas
+	public List<Orden> ObtenerOrdenes(){
+		return new ArrayList<>(ordenes.values());
+	}
+	
+	public List<Orden> ObtOrdenesIn(){ //Obtener ordenes inicializadas
 		List<Orden> ordenesIniciadas = new ArrayList<>();
-		for (Orden orden : ordenes) {
+		for (Orden orden : ordenes.values()) {
 			if ("Iniciado".equals(orden.getEstado())) {
 				ordenesIniciadas.add(orden);
 			}
 		}
 		return ordenesIniciadas;
 	}
-	public List ObtOrdenesPen() { //Obtener ordenes pendientes
+	public List<Orden> ObtOrdenesPen() { //Obtener ordenes pendientes
 		List<Orden> ordenesPendientes = new ArrayList<>();
-		for (Orden orden : ordenes) {
+		for (Orden orden : ordenes.values()) {
 			if ("Pendiente".equals(orden.getEstado())) {
 				ordenesPendientes.add(orden);
 			}
@@ -50,9 +56,9 @@ public class Cliente {
 		return ordenesPendientes;
 	}
 	
-	public List ObtOrdenesTer() {//Obtener ordenes terminadas
+	public List<Orden> ObtOrdenesTer() {//Obtener ordenes terminadas
 		List<Orden> ordenesTerminadas = new ArrayList<>();
-		for (Orden orden : ordenes) {
+		for (Orden orden : ordenes.values()) {
 			if ("Terminada".equals(orden.getEstado())) {
 				ordenesTerminadas.add(orden);
 			}
