@@ -287,6 +287,10 @@ public class Controladora implements Serializable {
 	public void establecerOrdenPendiente(int numeroOrden) throws Exception { //Originalmente no en mi UML
 		verificarOrdenExistente(numeroOrden);
         Orden orden = ordenes.get(numeroOrden);
+        if (!"Iniciado".equals(orden.getEstado())) {
+            throw new Exception("Solo se pueden marcar como pendiente las órdenes iniciadas.");
+        }
+        orden.restarExistencias();
         orden.setEstado("Pendiente");
 	}
 	
@@ -299,9 +303,12 @@ public class Controladora implements Serializable {
 	public void agregarLineaOrden(int numeroOrden, int codigoProducto, double cantidad) throws Exception { //Originalmente no en mi UML
 		verificarOrdenExistente(numeroOrden);
         verificarProductoExistente(codigoProducto);
-        if (cantidad < 0)
-            throw new Exception("La cantidad no debe ser negativa.");
+        if (cantidad <= 0)
+            throw new Exception("La cantidad debe ser mayor que 0..");
         Orden orden = ordenes.get(numeroOrden);
+        if (!"Iniciado".equals(orden.getEstado())) {
+            throw new Exception("Solo se pueden agregar líneas a órdenes iniciadas.");
+        }
         Producto producto = productos.get(codigoProducto);
         orden.agregarLinea(producto, cantidad);
 	}
@@ -311,6 +318,9 @@ public class Controladora implements Serializable {
         verificarLineaOrdenExistente(numeroOrden, numeroLinea);
         verificarProductoExistente(codigoProducto);
         Orden orden = ordenes.get(numeroOrden);
+        if (!"Iniciado".equals(orden.getEstado())) {
+            throw new Exception("Solo se pueden editar líneas de órdenes iniciadas.");
+        }
         Producto producto = productos.get(codigoProducto);
         orden.actualizarLinea(numeroLinea, producto, cantidad);
 	}
@@ -319,6 +329,9 @@ public class Controladora implements Serializable {
 		verificarOrdenExistente(numeroOrden);
         verificarLineaOrdenExistente(numeroOrden, numeroLinea);
         Orden orden = ordenes.get(numeroOrden);
+        if (!"Iniciado".equals(orden.getEstado())) {
+            throw new Exception("Solo se pueden borrar líneas de órdenes iniciadas.");
+        }
         orden.borrarLinea(numeroLinea);
 	}
 	

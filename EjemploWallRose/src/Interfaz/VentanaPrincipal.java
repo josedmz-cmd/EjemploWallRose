@@ -28,6 +28,7 @@ import javax.swing.JScrollPane;
 import Controladora.Controladora;
 import Logica.Cliente;
 import Logica.Producto;
+import Logica.Orden;
 
 import java.awt.event.FocusAdapter;
 import java.util.List;
@@ -36,6 +37,8 @@ import java.awt.event.ComponentEvent;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import javax.swing.JLabel;
+import java.awt.Font;
 
 public class VentanaPrincipal {
 
@@ -56,6 +59,8 @@ public class VentanaPrincipal {
     private JTable tablaProductos;
     private JTable tablaOrdenes;
     private JScrollPane scrollPane_2;
+    private JLabel LabelTotal;
+    private JLabel labelTotalPendiente;
 
 	/**
 	 * Launch the application.
@@ -199,6 +204,104 @@ public class VentanaPrincipal {
 						JOptionPane.ERROR_MESSAGE);
 			}
 		}
+	}
+	
+	public void cargarOrdenes() {
+	    Controladora control = Controladora.getInstance();
+	    DefaultTableModel model = (DefaultTableModel) tablaOrdenes.getModel();
+	    model.setRowCount(0);
+	    List<Orden> listaOrdenes = control.ObtenerOrdenes();
+	    for (Orden orden : listaOrdenes) {
+	        Object[] fila = new Object[] {
+	            orden.getNumero(), 
+	            orden.getFechaCreacion(), 
+	            orden.getEstado()
+	        };
+	        model.addRow(fila);
+	    }
+	    actualizarTotalPendiente();
+	}
+
+	public void refrescarOrdenes() {
+	    cargarOrdenes();
+	}
+
+	private void actualizarTotalPendiente() {
+	    Controladora control = Controladora.getInstance();
+	    double total = control.obtenerMontoTotalPendiente();
+	    labelTotalPendiente.setText(String.format("₡%.2f", total));
+	}
+
+	private void nuevaOrden() {
+	    List<Cliente> clientes = Controladora.getInstance().ObtenerClientes();
+	    if (clientes.isEmpty()) {
+	        JOptionPane.showMessageDialog(frame, "No hay clientes disponibles. Debe crear un cliente primero.", "Error", JOptionPane.ERROR_MESSAGE);
+	        return;
+	    }
+	    String[] nombresClientes = new String[clientes.size()];
+	    for (int i = 0; i < clientes.size(); i++) {
+	        nombresClientes[i] = clientes.get(i).getID() + " - " + clientes.get(i).getNombre();
+	    }
+	    String seleccion = (String) JOptionPane.showInputDialog(
+	        frame,
+	        "Seleccione el cliente:",
+	        "Nueva Orden",
+	        JOptionPane.QUESTION_MESSAGE,
+	        null,
+	        nombresClientes,
+	        nombresClientes[0]
+	    );
+	    if (seleccion != null) {
+	        String idCliente = seleccion.split(" - ")[0];
+	        try {
+	            Controladora control = Controladora.getInstance();
+	            control.crearOrdenVacia(idCliente);
+	            cargarOrdenes();
+	            JOptionPane.showMessageDialog(frame, "Orden creada exitosamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+	        } catch (Exception e) {
+	            JOptionPane.showMessageDialog(frame, "Error al crear orden: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+	        }
+	    }
+	}
+
+	private void verDetalleOrden() {
+	    int filaSeleccionada = tablaOrdenes.getSelectedRow();
+	    if (filaSeleccionada == -1) {
+	        JOptionPane.showMessageDialog(frame, "Debe seleccionar una orden.", "Error", JOptionPane.ERROR_MESSAGE);
+	        return;
+	    }
+	    DefaultTableModel model = (DefaultTableModel) tablaOrdenes.getModel();
+	    int numeroOrden = (int) model.getValueAt(filaSeleccionada, 0);
+	    Orden orden = Controladora.getInstance().obtenerOrden(numeroOrden);
+	    DetalleOrden detalle = new DetalleOrden(this, orden);
+	    detalle.setVisible(true);
+	}
+
+	private void borrarOrden() {
+	    int filaSeleccionada = tablaOrdenes.getSelectedRow();
+	    if (filaSeleccionada == -1) {
+	        JOptionPane.showMessageDialog(frame, "Debe seleccionar una orden.", "Error", JOptionPane.ERROR_MESSAGE);
+	        return;
+	    }
+	    DefaultTableModel model = (DefaultTableModel) tablaOrdenes.getModel();
+	    int numeroOrden = (int) model.getValueAt(filaSeleccionada, 0);
+	    String estado = (String) model.getValueAt(filaSeleccionada, 2);
+	    
+	    if ("Terminada".equals(estado)) {
+	        JOptionPane.showMessageDialog(frame, "No se pueden borrar órdenes terminadas.", "Error", JOptionPane.ERROR_MESSAGE);
+	        return;
+	    }
+	    int respuesta = JOptionPane.showConfirmDialog(frame, "¿Está seguro de borrar la orden #" + numeroOrden + "?", "Confirmar", JOptionPane.YES_NO_OPTION);
+	    if (respuesta == JOptionPane.YES_OPTION) {
+	        try {
+	            Controladora control = Controladora.getInstance();
+	            control.borrarOrden(numeroOrden);
+	            cargarOrdenes();
+	            JOptionPane.showMessageDialog(frame, "Orden borrada exitosamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+	        } catch (Exception e) {
+	            JOptionPane.showMessageDialog(frame, "Error al borrar orden: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+	        }
+	    }
 	}
 	private void cargarDatos() {
 		try {
@@ -379,16 +482,46 @@ public class VentanaPrincipal {
 		scrollPane_2.setViewportView(tablaOrdenes);
 		
 		JButton btnNuevaOrden = new JButton("Nueva");
+		btnNuevaOrden.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		        nuevaOrden();
+		    }
+		});
 		btnNuevaOrden.setBounds(553, 14, 89, 23);
 		panelOrdenes.add(btnNuevaOrden);
-		
+
 		JButton btnDetalle = new JButton("Detalle");
+		btnDetalle.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		        verDetalleOrden();
+		    }
+		});
 		btnDetalle.setBounds(553, 62, 89, 23);
 		panelOrdenes.add(btnDetalle);
-		
+
 		JButton btnBorrarOrden = new JButton("Borrar");
+		btnBorrarOrden.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		        borrarOrden();
+		    }
+		});
 		btnBorrarOrden.setBounds(553, 114, 89, 23);
 		panelOrdenes.add(btnBorrarOrden);
+		
+		panelOrdenes.addComponentListener(new ComponentAdapter() {
+		    public void componentShown(ComponentEvent e) {
+		        cargarOrdenes();
+		    }
+		});
+		
+		LabelTotal = new JLabel("Total Pendiente:");
+		LabelTotal.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		LabelTotal.setBounds(489, 171, 118, 14);
+		panelOrdenes.add(LabelTotal);
+		
+		labelTotalPendiente = new JLabel("0.0");
+		labelTotalPendiente.setBounds(492, 196, 150, 14);
+		panelOrdenes.add(labelTotalPendiente);
 		
 		panelProductos = new JPanel();
 		panelProductos.addComponentListener(new ComponentAdapter() {

@@ -48,40 +48,52 @@ public class Orden implements Serializable {
 	}
 	
 	public void agregarLinea(Producto producto, double cantidad) {
-		if (producto.getExistencias() >= cantidad) {
-			Linea linea = new Linea(producto, cantidad);
-			Lineas.add(linea);
-			producto.setExistencias(producto.getExistencias() - cantidad);
-		} else {
-			System.out.println("No hay suficientes existencias del producto: " + producto.getNombre());
-		}
+		Linea linea = new Linea(producto, cantidad);
+        Lineas.add(linea);
 	}
 	
 	public void actualizarLinea(int posicion, Producto producto, double cantidad) {
 		if (posicion >= 0 && posicion < Lineas.size()) {
-			Linea lineaActual = Lineas.get(posicion);
-			Producto productoAnterior = lineaActual.getProducto();
-			productoAnterior.setExistencias(productoAnterior.getExistencias() + lineaActual.getCantidad());
-			if (producto.getExistencias() >= cantidad) {
-				Linea nuevaLinea = new Linea(producto, cantidad);
-				Lineas.set(posicion, nuevaLinea);
-				producto.setExistencias(producto.getExistencias() - cantidad);
-			} else {
-				System.out.println("No hay suficientes existencias del nuevo producto");
-			}
-		}
-	}
+            Linea lineaActual = Lineas.get(posicion);
+            lineaActual.setProducto(producto);
+            lineaActual.setCantidad(cantidad);
+        }
+    }
 	
 	public void borrarLinea(int numeroLinea) {
-		if (numeroLinea >= 0 && numeroLinea < Lineas.size()) {
-			Linea lineaEliminar = Lineas.get(numeroLinea);
-			Producto producto = lineaEliminar.getProducto();
-			producto.setExistencias(producto.getExistencias() + lineaEliminar.getCantidad());
-			Lineas.remove(numeroLinea);
-		}
-	}
+        if (numeroLinea >= 0 && numeroLinea < Lineas.size()) {
+            Lineas.remove(numeroLinea);
+        }
+    }
 	//Aquí empiezan los que no estaban en mi UML
 
+	public boolean validarExistencias() {
+	    for (Linea linea : Lineas) {
+	        Producto producto = linea.getProducto();
+	        double cantidad = linea.getCantidad();
+	        if (producto.getExistencias() < cantidad) {
+	            return false;
+	        }
+	    }
+	    return true;
+	}
+
+	public void restarExistencias() throws Exception {
+		for (Linea linea : Lineas) {
+            Producto producto = linea.getProducto();
+            double cantidad = linea.getCantidad();
+            if (producto.getExistencias() < cantidad) {
+                throw new Exception("No hay suficientes existencias de: " + producto.getNombre() + 
+                                    " (Stock: " + producto.getExistencias() + ", Solicitado: " + cantidad + ")");
+            }
+        }
+		for (Linea linea : Lineas) {
+            Producto producto = linea.getProducto();
+            double cantidad = linea.getCantidad();
+            producto.setExistencias(producto.getExistencias() - cantidad);
+        }
+    }
+	
 	public String getEstado() {
 		return estado;
 	}
