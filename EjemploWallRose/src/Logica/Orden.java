@@ -3,8 +3,9 @@ package Logica;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
+import java.io.Serializable;
 
-public class Orden {
+public class Orden implements Serializable {
 	private int codigo;
 	private int numero;
 	private LocalDateTime fechaCreacion;
@@ -12,7 +13,6 @@ public class Orden {
 	private float impuesto = 0.13f;
 	private List<Linea> Lineas;
 	private Cliente cliente;
-	private static int contadorOrdenes = 1;
 	
 	public Orden (Cliente cliente, int codigo) {
 		this.codigo = codigo;
@@ -39,7 +39,7 @@ public class Orden {
 		return calcularMonto() + calcularMontoImpuesto();
 	}
 	
-	public List obtLineas() {
+	public List<Linea> obtLineas() {
 		return Lineas;
 	}
 	
