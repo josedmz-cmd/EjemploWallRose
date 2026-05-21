@@ -73,7 +73,7 @@ public class VentanaPrincipal {
         });
     }
 	
-    private void cargarClientes() {
+    public void cargarClientes() {
         Controladora control = Controladora.getInstance();
         DefaultTableModel model = (DefaultTableModel) tablaClientes.getModel();
         model.setRowCount(0);
@@ -84,6 +84,10 @@ public class VentanaPrincipal {
         }
     }
 	
+    public void refrescarClientes() {
+        cargarClientes();
+    }
+    
 	private void verCliente() {
 		int numeroFila = tablaClientes.getSelectedRow();
 		if (numeroFila == -1) {
@@ -98,11 +102,23 @@ public class VentanaPrincipal {
 	}
 
 	private void agregarCliente() {
-        JOptionPane.showMessageDialog(frame, "Funcionalidad no implementada aún", "Info", JOptionPane.INFORMATION_MESSAGE);
+		AgregarEditarCliente ventana = new AgregarEditarCliente(this);
+	    ventana.setVisible(true);
     }
 	
 	private void editarCliente() {
-        JOptionPane.showMessageDialog(frame, "Funcionalidad no implementada aún", "Info", JOptionPane.INFORMATION_MESSAGE);
+		int numeroFila = tablaClientes.getSelectedRow();
+	    if (numeroFila == -1) {
+	        JOptionPane.showMessageDialog(
+	                frame, "Debe seleccionar un cliente.", "Error", JOptionPane.ERROR_MESSAGE);
+	    } else {
+	        DefaultTableModel model = (DefaultTableModel) tablaClientes.getModel();
+	        String idCliente = (String) model.getValueAt(numeroFila, 0);
+	        String nombreCliente = (String) model.getValueAt(numeroFila, 1);
+	        String emailCliente = (String) model.getValueAt(numeroFila, 2);
+	        AgregarEditarCliente ventana = new AgregarEditarCliente(this, idCliente, nombreCliente, emailCliente);
+	        ventana.setVisible(true);
+	    }
     }
 	
 	private void borrarCliente() {
@@ -273,10 +289,33 @@ public class VentanaPrincipal {
 		panelClientes.add(btnVerCliente);
 		
 		btnAgregarCliente = new JButton("Agregar");
+		btnAgregarCliente.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		        AgregarEditarCliente ventana = new AgregarEditarCliente(VentanaPrincipal.this);
+		        ventana.setVisible(true);
+		    }
+		});
 		btnAgregarCliente.setBounds(552, 50, 115, 28);
 		panelClientes.add(btnAgregarCliente);
-		
+
 		btnEditarCliente = new JButton("Editar");
+		btnEditarCliente.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		        int numeroFila = tablaClientes.getSelectedRow();
+		        if (numeroFila == -1) {
+		            JOptionPane.showMessageDialog(
+		                    frame, "Debe seleccionar un cliente.", "Error", JOptionPane.ERROR_MESSAGE);
+		        } else {
+		            DefaultTableModel model = (DefaultTableModel) tablaClientes.getModel();
+		            String idCliente = (String) model.getValueAt(numeroFila, 0);
+		            String nombreCliente = (String) model.getValueAt(numeroFila, 1);
+		            String emailCliente = (String) model.getValueAt(numeroFila, 2);
+		            
+		            AgregarEditarCliente ventana = new AgregarEditarCliente(VentanaPrincipal.this, idCliente, nombreCliente, emailCliente);
+		            ventana.setVisible(true);
+		        }
+		    }
+		});
 		btnEditarCliente.setBounds(552, 89, 115, 28);
 		panelClientes.add(btnEditarCliente);
 		
