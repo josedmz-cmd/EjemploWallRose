@@ -150,16 +150,19 @@ public class VentanaPrincipal {
 			}
 		}
 	}
-	private void cargarProductos() {
-		Controladora control = Controladora.getInstance();
-		DefaultTableModel model = (DefaultTableModel) tablaProductos.getModel();
-		model.setRowCount(0);
-		List<Producto> listaProductos = control.ObtenerProductos();
-		for (Producto p : listaProductos) {
-			Object[] fila = new Object[] {p.getCodigo(), p.getNombre(), p.getExistencias(), p.getUnidad(), p.getPrecio()};
-			model.addRow(fila);			
-		}		
+	public void cargarProductos() {
+	    Controladora control = Controladora.getInstance();
+	    DefaultTableModel model = (DefaultTableModel) tablaProductos.getModel();
+	    model.setRowCount(0);
+	    List<Producto> listaProductos = control.ObtenerProductos();
+	    for (Producto p : listaProductos) {
+	        Object[] fila = new Object[] {p.getCodigo(), p.getNombre(), p.getExistencias(), p.getUnidad(), p.getPrecio()};
+	        model.addRow(fila);            
+	    }       
 	}
+	public void refrescarProductos() {
+        cargarProductos();
+    }
 	private void borrarProducto() {
 		int numeroFila = tablaProductos.getSelectedRow();
 		if (numeroFila == -1) {
@@ -423,10 +426,32 @@ public class VentanaPrincipal {
 		scrollPane_1.setViewportView(tablaProductos);
 		
 		btnAgregarProducto = new JButton("Agregar");
+		btnAgregarProducto.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		        AgregarEditarProducto ventana = new AgregarEditarProducto(VentanaPrincipal.this);
+		        ventana.setVisible(true);
+		    }
+		});
 		btnAgregarProducto.setBounds(552, 11, 115, 28);
 		panelProductos.add(btnAgregarProducto);
 		
 		btnEditarProducto = new JButton("Editar");
+		btnEditarProducto.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		        int numeroFila = tablaProductos.getSelectedRow();
+		        if (numeroFila == -1) {
+		            JOptionPane.showMessageDialog(
+		                    frame, "Debe seleccionar un producto.", "Error", JOptionPane.ERROR_MESSAGE);
+		        } else {
+		            DefaultTableModel model = (DefaultTableModel) tablaProductos.getModel();
+		            int codigo = (int) model.getValueAt(numeroFila, 0);
+		            Producto producto = Controladora.getInstance().ObtenerProducto(codigo);
+		            
+		            AgregarEditarProducto ventana = new AgregarEditarProducto(VentanaPrincipal.this, producto);
+		            ventana.setVisible(true);
+		        }
+		    }
+		});
 		btnEditarProducto.setBounds(552, 50, 115, 28);
 		panelProductos.add(btnEditarProducto);
 		

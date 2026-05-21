@@ -38,6 +38,9 @@ public class AgregarEditarCliente {
             }
         });
     }
+    /**
+	 * Create the application.
+	 */
     public AgregarEditarCliente() {
         this.ventanaPrincipal = null;
         this.esEdicion = false;
